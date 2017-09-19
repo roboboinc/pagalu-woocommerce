@@ -1,5 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: *");
 /**
  * Plugin Name: PagaLu Payment Gateway WooCommerce Extension
  * Plugin URI: https://pagalu.co.mz/dev-products/woocommerce-extension/
@@ -222,7 +221,7 @@ function wc_pagalu_gateway_init() {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_URL, $this->pagalu_url);
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $param_str);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $param_list);
 
             // in real life you should use something like:
             // curl_setopt($ch, CURLOPT_POSTFIELDS,
@@ -232,10 +231,6 @@ function wc_pagalu_gateway_init() {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
             $server_output = curl_exec ($ch);
-
-            //get the default response headers to allow for CORS
-            header('Content-Type: image/jpeg');
-            header("Access-Control-Allow-Origin: *");
 
             //close connection
             curl_close ($ch);
@@ -254,17 +249,25 @@ function wc_pagalu_gateway_init() {
                 // SUccess Redirect to PagaLu
 //                echo wpautop( wptexturize( $json['response_url'] ) );
                 $json_url = $json['response_url'];
-                wp_redirect("$json_url"); //Redirect to PagaLU
-                exit;
+//                wp_redirect("$json_url"); //Redirect to PagaLU
+                return array(
+                'result'   => 'success',
+                'redirect' => $json_url
+                );
             } else {
                 //FAIL at PAGALU
-//                echo wpautop( wptexturize( $server_output ) ); //DEBUG
-//                echo wpautop( wptexturize( $json ) ); //DEBUG
-                wp_redirect( "{$this->pagalu_url}?{$param_str}" );
+                return array(
+                'result'   => 'fail',
+                'redirect' => $json_url
+                );
+                //wp_redirect( "{$this->pagalu_url}?{$param_str}" );
                 exit;
             }
 
-//            wp_redirect( "{$this->pagalu_url}?{$param_str}" ); //
+            return array(
+                'result'   => 'success',
+                'redirect' => $json_url
+            );
             exit;
 		}
 
