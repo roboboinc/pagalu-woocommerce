@@ -1,5 +1,5 @@
 === PagaLu Payment Gateway ===
-Contributors: Fei Manheche
+Contributors: Fei Manheche and Arnaldo Govene
 Requires at least: 4.7
 Tested up to: 4.8
 Stable tag: 1.0.0
