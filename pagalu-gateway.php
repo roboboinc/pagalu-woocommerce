@@ -217,7 +217,7 @@ function wc_pagalu_gateway_init() {
             }
         function ipn() {
           if (isset($_POST['order_id_received_from_payment_gateway_server'])){
-             $order_id  = $_POST['order_id_received_from_payment_gateway_server']; // $_POST variable received from payment gateway server (it's important to use )
+             $order_id  = $_POST['order_id_received_from_payment_gateway_server']; // $_POST variable received from payment gateway server (it's important to use $_POST for security )
              $order = new WC_Order( $order_id );
              $order->update_status('completed');
           }
