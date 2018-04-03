@@ -173,6 +173,8 @@ function wc_pagalu_gateway_init() {
             $params[ 'success_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
             $params[ 'reject_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
             $params[ 'extras' ]  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
+            $params[ 'phone_number' ]  = $order_data['billing']['phone'];
+            $params[ 'email' ]  = $order_data['billing']['email'];
 //            if ( $this->mode == 'sandbox' ) {
 //                $params[ 'demo' ] = 'Y';
 //            }
