@@ -224,7 +224,6 @@ function wc_pagalu_gateway_init() {
             $id = $_GET['id'];
 
             $ch = curl_init();
-            $params = json_encode($params); // Json encodes $params array
             $authorization = "Authorization: Bearer ";
             $authorization .=  $this->apitoken;
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
