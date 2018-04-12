@@ -88,7 +88,7 @@ function wc_pagalu_gateway_init() {
                   // Customer Emails
                   add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
                   // The IPN
-                  add_action('woocommerce_api_wc_gateway_pagalu', array($this, 'ipn'));
+                  add_action( 'woocommerce_api_'. strtolower( get_class($this) ), array( $this, 'ipn' ) );
 
             }
             /**
@@ -218,10 +218,36 @@ function wc_pagalu_gateway_init() {
             exit;
             }
         function ipn() {
-          if (isset($_POST['order_id_received_from_payment_gateway_server'])){
-             $order_id  = $_POST['order_id_received_from_payment_gateway_server']; // $_POST variable received from payment gateway server (it's important to use )
-             $order = new WC_Order( $order_id );
-             $order->update_status('completed');
+
+          if (isset($_GET['id'])){
+
+            $id = $_GET['id'];
+
+            $ch = curl_init();
+            $authorization = "Authorization: Bearer ";
+            $authorization .=  $this->apitoken;
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_URL, $this->pagalu_url.$id.'/');
+            // receive server response ...
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $server_output = curl_exec ($ch);
+            //close connection
+            curl_close ($ch);
+            flush();
+
+            $json = json_decode($server_output, true);
+
+            if (json_last_error() == JSON_ERROR_NONE) {
+              if(isset($json['status'])){
+                 $order_id = $json['reference'];
+                 $order = new WC_Order( $order_id );
+                 $order->update_status($json['status']);
+              }
+
+            } 
+
           }
          exit;
         }
