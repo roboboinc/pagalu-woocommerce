@@ -240,10 +240,10 @@ function wc_pagalu_gateway_init() {
             $json = json_decode($server_output, true);
 
             if (json_last_error() == JSON_ERROR_NONE) {
-              if($json['status'] == 'Processed'){
+              if(isset($json['status'])){
                  $order_id = $json['reference'];
                  $order = new WC_Order( $order_id );
-                 $order->update_status('completed');
+                 $order->update_status($json['status']);
               }
 
             } 
