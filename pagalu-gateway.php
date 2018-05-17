@@ -3,7 +3,7 @@
  * Plugin Name: PagaLu Payment Gateway WooCommerce Extension
  * Plugin URI: https://pagalu.co.mz/dev-products/woocommerce-extension/
  * Description: A Payment Gateway Plugin for PagaLu
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Robobo Inc
  * Author URI: http://Robobo.org/
  * Developers: Fei Manheche and Arnaldo Govene
@@ -65,6 +65,18 @@ function wc_pagalu_gateway_init() {
              * Constructor for the gateway.
              */
             public function __construct() {
+                if (!function_exists('write_log')) {
+        function write_log ( $logg )  {
+          if ( true === WP_DEBUG ) {
+            if ( is_array( $logg ) || is_object( $logg ) ) {
+              error_log( print_r( $logg, true ) );
+            } else {
+              error_log( $logg );
+            }
+          }
+        }
+      }
+
                   $this->id                 = 'pagalu_gateway';
                   $this->icon               = apply_filters('woocommerce_pagalu_icon', '');
                   $this->has_fields         = false;
@@ -87,8 +99,13 @@ function wc_pagalu_gateway_init() {
                   add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
                   // Customer Emails
                   add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+
+                str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'WC_Gateway_Paypal', home_url( '/' ) ) );
+
                   // The IPN
-                  add_action( 'woocommerce_api_'. strtolower( get_class($this) ), array( $this, 'ipn' ) );
+                add_action( 'woocommerce_api_wc_gateway_pagalu', array( $this, 'check_ipn_response' ) );
+
+//                  add_action( 'woocommerce_api_callback', 'ipn' );
 
             }
             /**
@@ -164,14 +181,16 @@ function wc_pagalu_gateway_init() {
             $order_data = $order->get_data(); // The Order data
                   // Mark as on-hold (we're awaiting the payment)
                   $order->update_status( 'on-hold', __( 'Awaiting PagaLu payment', 'wc-gateway-pagalu' ) );
-                  $success_url = 'http://'.$_SERVER['SERVER_NAME'].'?wp-api=WC_Gateway_Pagalu';
+                  $success_url = 'http://'.$_SERVER['SERVER_NAME'].'/wc-api/WC_Gateway_Pagalu';
+                  $client_origin_url = 'http://'.$_SERVER['SERVER_NAME'];
 
             // Here we send the user to PagaLu.co.mz for processing
             $params                            = array();
             $params[ 'value' ]                 = $order->get_total();
             $params[ 'reference' ]             = $order_id;
             $params[ 'success_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
-            $params[ 'reject_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'reject_url' ]            = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'origin_request_url' ]    = $client_origin_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
             $params[ 'extras' ]  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
             $params[ 'phone_number' ]  = $order_data['billing']['phone'];
             $params[ 'email' ]  = $order_data['billing']['email'];
@@ -217,11 +236,12 @@ function wc_pagalu_gateway_init() {
             }
             exit;
             }
-        function ipn() {
+        function check_ipn_response() {
 
-          if (isset($_GET['id'])){
+//            $write_log("Got to IPN");
+          if (isset($_POST['id'])){
 
-            $id = $_GET['id'];
+            $id = $_POST['id'];
 
             $ch = curl_init();
             $authorization = "Authorization: Bearer ";
