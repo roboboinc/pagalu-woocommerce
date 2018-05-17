@@ -181,8 +181,8 @@ function wc_pagalu_gateway_init() {
             $order_data = $order->get_data(); // The Order data
                   // Mark as on-hold (we're awaiting the payment)
                   $order->update_status( 'on-hold', __( 'Awaiting PagaLu payment', 'wc-gateway-pagalu' ) );
-                  $success_url = 'http://'.$_SERVER['SERVER_NAME'].'/wc-api/WC_Gateway_Pagalu';
-                  $client_origin_url = 'http://'.$_SERVER['SERVER_NAME'];
+                  $success_url = get_site_url().'/wc-api/WC_Gateway_Pagalu';
+                  $client_origin_url = get_site_url();
 
             // Here we send the user to PagaLu.co.mz for processing
             $params                            = array();
