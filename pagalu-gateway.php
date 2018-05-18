@@ -188,9 +188,9 @@ function wc_pagalu_gateway_init() {
             $params                            = array();
             $params[ 'value' ]                 = $order->get_total();
             $params[ 'reference' ]             = $order_id;
-            $params[ 'success_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
-            $params[ 'reject_url' ]            = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
-            $params[ 'origin_request_url' ]    = $client_origin_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'success_url' ]           = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'reject_url' ]            = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'origin_request_url' ]    = $order->get_checkout_order_received_url(); //url where users will be sent after purchase process
             $params[ 'extras' ]  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
             $params[ 'phone_number' ]  = $order_data['billing']['phone'];
             $params[ 'email' ]  = $order_data['billing']['email'];
