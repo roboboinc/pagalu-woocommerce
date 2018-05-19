@@ -3,7 +3,7 @@
  * Plugin Name: PagaLu Payment Gateway WooCommerce Extension
  * Plugin URI: https://pagalu.co.mz/dev-products/woocommerce-extension/
  * Description: A Payment Gateway Plugin for PagaLu
- * Version: 1.0.1
+ * Version: 1.1
  * Author: Robobo Inc
  * Author URI: http://Robobo.org/
  * Developers: Fei Manheche and Arnaldo Govene
@@ -83,8 +83,9 @@ function wc_pagalu_gateway_init() {
                   $this->method_title       = __( 'PagaLu', 'wc-gateway-pagalu' );
                   $this->method_description = __( 'A Payment Gateway from https://www.pagalu.co.mz/, allowing you to recieve payments from different local providers including bank transfer, mobile wallets and more added everyday.', 'wc-gateway-pagalu' );
             // Parameters and settings
-            $this->mode  = $this->get_option( 'mode', 'sandbox' );
+            $this->mode  = $this->get_option( 'sandbox' );
             $this->pagalu_url  = 'https://www.pagalu.co.mz/pagamento-ext/api/pay-ext/';
+            $this->pagalu_sandbox_url  = 'http://sandbox.pagalu.co.mz/pagamento-ext/api/pay-ext/';
             $this->currency = 'MZN';
                   // Load the settings.
                   $this->init_form_fields();
@@ -147,6 +148,12 @@ function wc_pagalu_gateway_init() {
                               'default'     => '',
                               'desc_tip'    => true,
                         ),
+                        'sandbox' => array(
+                              'title'   => __( 'Enable/Disable Sandbox mode', 'wc-gateway-pagalu' ),
+                              'type'    => 'checkbox',
+                              'label'   => __( 'Enable use of Sandbox API Key for Payment', 'wc-gateway-pagalu' ),
+                              'default' => 'yes'
+                        ),
                   ) );
             }
             /**
@@ -194,9 +201,12 @@ function wc_pagalu_gateway_init() {
             $params[ 'extras' ]  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
             $params[ 'phone_number' ]  = $order_data['billing']['phone'];
             $params[ 'email' ]  = $order_data['billing']['email'];
-//            if ( $this->mode == 'sandbox' ) {
-//                $params[ 'demo' ] = 'Y';
-//            }
+
+
+            if ( $this->mode == 'yes' ) {
+                $this->pagalu_url = $this->pagalu_sandbox_url;
+            }
+
             $ch = curl_init();
             $params = json_encode($params); // Json encodes $params array
             $authorization = "Authorization: Bearer ";
@@ -242,6 +252,10 @@ function wc_pagalu_gateway_init() {
           if (isset($_POST['id'])){
 
             $id = $_POST['id'];
+
+              if ( $this->mode == 'yes' ) {
+                $this->pagalu_url = $this->pagalu_sandbox_url;
+            }
 
             $ch = curl_init();
             $authorization = "Authorization: Bearer ";
