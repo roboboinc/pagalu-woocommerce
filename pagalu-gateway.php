@@ -188,19 +188,21 @@ function wc_pagalu_gateway_init() {
             $order_data = $order->get_data(); // The Order data
                   // Mark as on-hold (we're awaiting the payment)
                   $order->update_status( 'on-hold', __( 'Awaiting PagaLu payment', 'wc-gateway-pagalu' ) );
-                  $success_url = get_site_url().'/wc-api/WC_Gateway_Pagalu';
+                  $success_url = $order->get_checkout_order_received_url(); //get_site_url().'/wc-api/WC_Gateway_Pagalu';
+                  $order_status_update_url = get_site_url().'/wc-api/WC_Gateway_Pagalu';
                   $client_origin_url = get_site_url();
 
             // Here we send the user to PagaLu.co.mz for processing
-            $params                            = array();
-            $params[ 'value' ]                 = $order->get_total();
-            $params[ 'reference' ]             = $order_id;
-            $params[ 'success_url' ]           = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
-            $params[ 'reject_url' ]            = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
-            $params[ 'origin_request_url' ]    = $order->get_checkout_order_received_url(); //url where users will be sent after purchase process
-            $params[ 'extras' ]  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
-            $params[ 'phone_number' ]  = $order_data['billing']['phone'];
-            $params[ 'email' ]  = $order_data['billing']['email'];
+            $params                              = array();
+            $params[ 'value' ]                   = $order->get_total();
+            $params[ 'reference' ]               = $order_id;
+            $params[ 'success_url' ]             = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'reject_url' ]              = $success_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'order_status_update_url' ] = $order_status_update_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+            $params[ 'origin_request_url' ]      = $order->get_checkout_order_received_url(); //url where users will be sent after purchase process
+            $params[ 'extras' ]                  = $order_data['billing']['first_name']. ' '. $order_data['billing']['last_name'];
+            $params[ 'phone_number' ]            = $order_data['billing']['phone'];
+            $params[ 'email' ]                   = $order_data['billing']['email'];
 
 
             if ( $this->mode == 'yes' ) {
