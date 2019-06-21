@@ -191,6 +191,9 @@ function wc_pagalu_gateway_init() {
                   $success_url = $order->get_checkout_order_received_url(); //get_site_url().'/wc-api/WC_Gateway_Pagalu';
                   $order_status_update_url = get_site_url().'/wc-api/WC_Gateway_Pagalu';
                   $client_origin_url = get_site_url();
+                
+            // V1.2 Use dynamic updater function
+//                $request_pagalu_url($order->get_total(), $order_id, $success_url, $success_url, ($order_data['billing']['first_name']. ' '. $order_data['billing']['last_name']), $order_data['billing']['phone'],  $order_data['billing']['email']);   
 
             // Here we send the user to PagaLu.co.mz for processing
             $params                              = array();
@@ -287,5 +290,64 @@ function wc_pagalu_gateway_init() {
           }
          exit;
         }
+          
+        /**
+         * Accessible class for WCMP and potentially third party plugins
+         */
+        public function process_payment_request( $amount ) {
+            return $this->echo_log('The amount is = ' . $amount);
+            
+        }
+          
+          
+        /* Requests Payment URL to PAGALU
+         * @param int $value
+         * @param string $reference
+         * @param string $success_url
+         * @param string $reject_url
+         * @param string $name_of_payer
+         * @param int $phone_number
+         * @param string $email
+         * @return array
+         */
+        function request_pagalu_url( $value, $reference, $success_url, $reject_url, $name_of_payer, $phone_number, $email) {
+            
+            // Here we send the user to PagaLu.co.mz for processing
+                $params                            = array();
+                $params[ 'value' ]                 = $value;
+                $params[ 'reference' ]             = $reference;
+                $params[ 'success_url' ]           = $success_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+                $params[ 'reject_url' ]           = $reject_url;//$this->ipn_url; //url where IPN messages will be sent after purchase, then validate in the ipn() method
+                $params[ 'extras' ]  = $name_of_payer;
+                $params[ 'phone_number' ]  = $phone_number;
+                $params[ 'email' ]  = $email;
+    //            if ( $this->mode == 'sandbox' ) {
+    //                $params[ 'demo' ] = 'Y';
+    //            }
+                $ch = curl_init();
+                $params = json_encode($params); // Json encodes $params array
+                $authorization = "Authorization: Bearer ";
+                $authorization .=  $this->apitoken;
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_URL, $this->pagalu_url);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+                // receive server response ...
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $server_output = curl_exec ($ch);
+                //close connection
+                curl_close ($ch);
+                flush();
+        }
+          
+        /* Echo variable TMP for debugging
+         * Description: Uses <pre> and print_r to display a variable in formated fashion
+         */
+        function echo_log( $what )
+        {
+            echo '<pre>'.print_r( $what, true ).'</pre>';
+        }
+          
   } // end \WC_Gateway_Pagalu class
 }
