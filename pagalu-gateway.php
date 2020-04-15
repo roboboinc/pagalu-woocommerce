@@ -85,7 +85,7 @@ function wc_pagalu_gateway_init() {
             // Parameters and settings
             $this->mode  = $this->get_option( 'sandbox' );
             $this->pagalu_url  = 'https://www.pagalu.co.mz/pagamento-ext/api/pay-ext/';
-            $this->pagalu_sandbox_url  = 'http://sandbox.pagalu.co.mz/pagamento-ext/api/pay-ext/';
+            $this->pagalu_sandbox_url  = 'https://sandbox.pagalu.co.mz/pagamento-ext/api/pay-ext/';
             $this->currency = 'MZN';
                   // Load the settings.
                   $this->init_form_fields();
